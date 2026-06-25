@@ -899,7 +899,6 @@ window.sendFeedback = async (type) => {
 /* ================= STAFF: LOAD FEEDBACK ================= */
 /* ================= STAFF: LOAD FEEDBACK & ANNOUNCEMENTS ================= */
 async function loadStaffFeedback() {
-  // Query both your own feedback OR any announcements belonging to this organization
   const { data, error } = await supabase
     .from("feedback")
     .select("*")
@@ -926,24 +925,26 @@ async function loadStaffFeedback() {
     const div = document.createElement("div");
     div.className = "item";
     
-    // Style adjustments if it's a gold announcement
+    // Transform the entire box layout to golden if it's an announcement
     if (isAnnouncement) {
-      div.style.borderLeftColor = "#ffd700"; // Gold border
-      div.style.background = "rgba(255, 215, 0, 0.03)"; // Subtle gold tint background
+      div.style.background = "linear-gradient(135deg, #f59e0b 0%, #b45309 100%)"; 
+      div.style.border = "1px solid #fef08a";
+      div.style.borderLeft = "6px solid #fef08a";
+      div.style.color = "#ffffff";
     }
     
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
         <div>
-          <b style="text-transform:uppercase; font-size:13px; color:${isAnnouncement ? '#ffd700' : 'var(--accent)'}; letter-spacing: 0.5px;">
+          <b style="text-transform:uppercase; font-size:13px; color:${isAnnouncement ? '#fef08a' : 'var(--accent)'}; letter-spacing: 0.5px;">
             ${isAnnouncement ? '📢 ' + item.type : item.type}
           </b>
-          <span class="department-tag">${item.department}</span>
+          <span class="department-tag" style="${isAnnouncement ? 'background: rgba(255,255,255,0.2); color: #fff;' : ''}">${item.department}</span>
         </div>
         <span class="badge ${isAnnouncement ? 'badge-announcement' : 'badge-' + item.status}">${item.status}</span>
       </div>
-      <div style="margin-bottom:12px; line-height:1.6; ${isAnnouncement ? 'font-weight: 500; color: #f8fafc;' : ''}">${item.message}</div>
-      <div class="timestamp">${formatDate(item.created_at)}</div>
+      <div style="margin-bottom:12px; line-height:1.6; font-size: 15px; font-weight: ${isAnnouncement ? '600' : '500'};">${item.message}</div>
+      <div class="timestamp" style="${isAnnouncement ? 'color: #fef08a;' : ''}">${formatDate(item.created_at)}</div>
       ${item.response ? `
         <div class="reply-box">
           <b style="color:var(--success); font-size:13px;">💬 Response:</b>
@@ -990,6 +991,7 @@ window.setFilter = (filter) => {
 };
 
 /* ================= ADMIN: LOAD PANEL ================= */
+/* ================= ADMIN: LOAD PANEL ================= */
 async function loadAdminPanel() {
   let query = supabase
     .from("feedback")
@@ -1022,7 +1024,16 @@ async function loadAdminPanel() {
     
     const div = document.createElement("div");
     div.className = "item";
-    div.style.borderLeftColor = isAnnouncement ? "var(--warning)" : "var(--accent)";
+    
+    // Transform the entire box layout to golden for Admin overview
+    if (isAnnouncement) {
+      div.style.background = "linear-gradient(135deg, #f59e0b 0%, #b45309 100%)";
+      div.style.border = "1px solid #fef08a";
+      div.style.borderLeft = "6px solid #fef08a";
+      div.style.color = "#ffffff";
+    } else {
+      div.style.borderLeftColor = "var(--accent)";
+    }
     
     let actions = '';
     if (!isAnnouncement) {
@@ -1040,22 +1051,22 @@ async function loadAdminPanel() {
     div.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
         <div>
-          <b>${item.user_name || "Unknown"}</b>
-          ${isAnnouncement ? '<span class="badge badge-announcement">📢 ANNOUNCEMENT</span>' : ''}
-          <span class="department-tag">${item.department}</span>
+          <b style="${isAnnouncement ? 'color: #fff;' : ''}">${item.user_name || "Unknown"}</b>
+          ${isAnnouncement ? '<span class="badge badge-announcement" style="background:#fff; color:#b45309;">📢 ANNOUNCEMENT</span>' : ''}
+          <span class="department-tag" style="${isAnnouncement ? 'background: rgba(255,255,255,0.2); color: #fff;' : ''}">${item.department}</span>
         </div>
         <span class="badge badge-${item.status}">${item.status}</span>
       </div>
       
-      <div style="margin-bottom:12px; line-height:1.6;">${item.message}</div>
-      <div class="timestamp" style="margin-bottom:14px;">${formatDate(item.created_at)}</div>
+      <div style="margin-bottom:12px; line-height:1.6; font-size: 15px; font-weight: ${isAnnouncement ? '600' : '400'};">${item.message}</div>
+      <div class="timestamp" style="margin-bottom:14px; ${isAnnouncement ? 'color: #fef08a;' : ''}">${formatDate(item.created_at)}</div>
       
       ${item.response ? `
         <div class="reply-box">
           <b style="color:var(--success); font-size:13px;">💬 Response:</b>
           <div style="margin-top:6px; color:var(--text-secondary);">${item.response}</div>
         </div>
-      ` : `
+      ` : isAnnouncement ? '' : `
         <div class="reply-box" id="reply-box-${item.id}">
           <textarea id="reply-text-${item.id}" placeholder="Type your response..." style="margin-top:0; margin-bottom:10px; background:var(--bg-secondary);"></textarea>
         </div>
